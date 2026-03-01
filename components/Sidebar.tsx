@@ -144,7 +144,7 @@ export default function Sidebar() {
                   <h1 className="font-display font-bold text-xl text-white">
                     Admin
                   </h1>
-                  <p className="text-xs text-gray-400">Livraria Elegante</p>
+                  <p className="text-xs text-gray-400">Booklovers</p>
                 </div>
               </div>
             )}

@@ -5,8 +5,8 @@ import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 
 export const metadata: Metadata = {
-  title: "Admin - Livraria Elegante",
-  description: "Painel administrativo da Livraria Elegante",
+  title: "Admin - Booklovers",
+  description: "Painel administrativo Booklovers",
 };
 
 export default function RootLayout({
