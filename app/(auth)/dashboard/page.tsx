@@ -19,7 +19,6 @@ export default function DashboardPage() {
   const { getStats, orders, products } = useAdmin();
   const stats = getStats();
 
-  // Mock data for charts
   const salesData = [
     { month: "Jan", vendas: 45000, pedidos: 120 },
     { month: "Fev", vendas: 52000, pedidos: 145 },
@@ -71,7 +70,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      {/* Page Header */}
       <div className="animate-fade-in">
         <h1 className="text-4xl font-display font-bold text-white mb-2">
           Dashboard
@@ -79,9 +77,7 @@ export default function DashboardPage() {
         <p className="text-gray-400">Visão geral do desempenho da livraria</p>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Total Revenue */}
         <div
           className="stat-card card-hover animate-scale-in"
           style={{ animationDelay: "0.1s" }}
@@ -134,7 +130,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Total Orders */}
         <div
           className="stat-card card-hover animate-scale-in"
           style={{ animationDelay: "0.2s" }}
@@ -184,7 +179,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Total Customers */}
         <div
           className="stat-card card-hover animate-scale-in"
           style={{ animationDelay: "0.3s" }}
@@ -234,7 +228,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Pending Orders */}
         <div
           className="stat-card card-hover animate-scale-in"
           style={{ animationDelay: "0.4s" }}
@@ -270,9 +263,7 @@ export default function DashboardPage() {
       </div>
       <LineChart />
 
-      {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Products */}
         <div className="card animate-fade-in">
           <h3 className="text-xl font-display font-semibold text-white mb-6">
             Produtos Mais Vendidos
@@ -299,7 +290,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Recent Orders */}
         <div className="card animate-fade-in">
           <h3 className="text-xl font-display font-semibold text-white mb-6">
             Pedidos Recentes

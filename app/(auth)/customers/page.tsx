@@ -33,7 +33,6 @@ export default function CustomersPage() {
   };
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="animate-fade-in">
         <h1 className="text-4xl font-display font-bold text-white mb-2">
           Clientes
@@ -41,7 +40,6 @@ export default function CustomersPage() {
         <p className="text-gray-400">Gerencie a base de clientes da livraria</p>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div
           className="stat-card card-hover animate-scale-in"
@@ -138,7 +136,6 @@ export default function CustomersPage() {
         </div>
       </div>
 
-      {/* Filters */}
       <div className="card animate-scale-in">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -170,7 +167,6 @@ export default function CustomersPage() {
         </div>
       </div>
 
-      {/* Customers Table */}
       <div className="card overflow-hidden animate-fade-in">
         <div className="overflow-x-auto">
           <table className="w-full">

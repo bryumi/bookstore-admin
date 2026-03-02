@@ -46,13 +46,11 @@ export default function ReturnsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="animate-fade-in">
         <h1 className="text-4xl font-display font-bold text-white mb-2">Devoluções</h1>
         <p className="text-gray-400">Gerencie solicitações de devolução e reembolso</p>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="stat-card card-hover animate-scale-in" style={{ animationDelay: '0.1s' }}>
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent-orange to-accent-red"></div>

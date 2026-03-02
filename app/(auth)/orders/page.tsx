@@ -50,7 +50,6 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between animate-fade-in">
         <div>
           <h1 className="text-4xl font-display font-bold text-white mb-2">
@@ -60,7 +59,6 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Filters */}
       <div className="card animate-scale-in">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -94,7 +92,6 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Orders Table */}
       <div className="card overflow-hidden animate-fade-in">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -203,7 +200,6 @@ export default function OrdersPage() {
         )}
       </div>
 
-      {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="card bg-gradient-to-br from-accent-blue/10 to-dark-800 border-accent-blue/30">
           <p className="text-gray-400 text-sm mb-1">Em Processamento</p>

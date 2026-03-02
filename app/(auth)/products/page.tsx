@@ -182,7 +182,6 @@ export default function ProductsPage() {
         </button>
       </div>
 
-      {/* Search */}
       <div className="card animate-scale-in">
         <input
           type="text"
@@ -193,7 +192,6 @@ export default function ProductsPage() {
         />
       </div>
 
-      {/* Products Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredProducts.map((product, index) => {
           const stockStatus = getStockStatus(product.stock);
@@ -305,7 +303,6 @@ export default function ProductsPage() {
         </div>
       )}
 
-      {/* Add/Edit Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-dark-800 border border-dark-600 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
