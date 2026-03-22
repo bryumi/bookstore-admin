@@ -1,4 +1,8 @@
 "use client";
+import { useAuth } from "@/hooks/useAuth";
+import { useSnackbar } from "@/hooks/useSnackbar";
+import api from "@/services/api/api";
+import { localStorageKeys } from "@/utils/localStorageKeys";
 import { ILoginForm, LoginSchema } from "@/validations/LoginSchema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
@@ -7,6 +11,9 @@ import { useForm } from "react-hook-form";
 
 export default function Home() {
   const [viewPassword, setViewPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { setUser } = useAuth();
+  const { showSnackbar } = useSnackbar();
   const {
     register,
     handleSubmit,
@@ -15,9 +22,22 @@ export default function Home() {
     resolver: yupResolver(LoginSchema),
   });
   const router = useRouter();
-  const onSubmit = (data: ILoginForm) => {
-    console.log(data);
-    router.push("/dashboard");
+  const onSubmit = async (form: ILoginForm) => {
+    try {
+      setIsSubmitting(true);
+      const { data } = await api.post("/login", {
+        email: form.email,
+        password: form.password,
+      });
+      setUser(data.user);
+      localStorage.setItem(localStorageKeys.accessToken, data.token);
+      localStorage.setItem(localStorageKeys.user, JSON.stringify(data.user));
+      router.push("/profile");
+    } catch (error) {
+      showSnackbar((error as any).response.data.error as string, "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -113,7 +133,11 @@ export default function Home() {
               )}
             </div>
             <div className="flex space-x-3 pt-4">
-              <button type="submit" className="btn-success flex-1">
+              <button
+                type="submit"
+                className="btn-success flex-1"
+                disabled={isSubmitting}
+              >
                 Entrar
               </button>
             </div>

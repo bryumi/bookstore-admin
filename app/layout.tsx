@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AdminProvider } from "@/lib/admin-context";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
+import Providers from "@/components/Providers/Providers";
 
 export const metadata: Metadata = {
   title: "Admin - Booklovers",
@@ -16,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

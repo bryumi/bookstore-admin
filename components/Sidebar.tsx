@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -7,6 +8,7 @@ import { useState } from "react";
 export default function Sidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { logout } = useAuth();
 
   const menuItems = [
     {
@@ -104,27 +106,27 @@ export default function Sidebar() {
       ),
       path: "/returns",
     },
-    {
-      name: "Sair",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="m16 17 5-5-5-5" />
-          <path d="M21 12H9" />
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-        </svg>
-      ),
-      path: "/",
-    },
+    // {
+    //   name: "Sair",
+    //   icon: (
+    //     <svg
+    //       xmlns="http://www.w3.org/2000/svg"
+    //       width="24"
+    //       height="24"
+    //       viewBox="0 0 24 24"
+    //       fill="none"
+    //       stroke="currentColor"
+    //       stroke-width="2"
+    //       stroke-linecap="round"
+    //       stroke-linejoin="round"
+    //     >
+    //       <path d="m16 17 5-5-5-5" />
+    //       <path d="M21 12H9" />
+    //       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    //     </svg>
+    //   ),
+    //   path: "/",
+    // },
   ];
 
   return (
@@ -203,6 +205,29 @@ export default function Sidebar() {
               </Link>
             );
           })}
+          <button
+            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group "text-gray-400 hover:bg-dark-700 hover:text-white"`}
+            onClick={logout}
+          >
+            <div className="text-gray-400 group-hover:text-white">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m16 17 5-5-5-5" />
+                <path d="M21 12H9" />
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              </svg>
+            </div>
+            {!isCollapsed && <span className="font-medium">Sair</span>}
+          </button>
         </nav>
 
         {/* Footer */}

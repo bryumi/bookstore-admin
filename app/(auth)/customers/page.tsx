@@ -1,36 +1,67 @@
 "use client";
 
+import ModalDetailsClient from "@/components/ModalDetailsClient";
+import { useSnackbar } from "@/hooks/useSnackbar";
 import { useAdmin } from "@/lib/admin-context";
+import { useDeleteAccount } from "@/services/clients/deleteAccount";
+import { useGetClients } from "@/services/clients/getClientData";
+import { useActiveOrInactiveClient } from "@/services/clients/toogleStatusClient";
+import { formatDate } from "@/utils/masks";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 export default function CustomersPage() {
-  const { customers, setCustomers } = useAdmin();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
   const [filterStatus, setFilterStatus] = useState<
     "all" | "active" | "inactive"
   >("all");
-
-  const filteredCustomers = customers.filter((customer) => {
-    const matchesSearch =
-      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.phone.includes(searchTerm);
-    const matchesStatus =
-      filterStatus === "all" || customer.status === filterStatus;
-    return matchesSearch && matchesStatus;
+  const [openModalDetails, setOpenModalDetails] = useState(false);
+  const [selectedId, setSelectedId] = useState("");
+  const { data } = useGetClients({ search: searchTerm });
+  // const filteredCustomers = data?.clients?.filter((customer) => {
+  //   const matchesSearch =
+  //     customer.name.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+  //     customer.email.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+  //     customer.phoneNumber.includes(searchTerm);
+  //   return matchesSearch;
+  // });
+  const { showSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
+  const { mutate: mutateSwitch } = useActiveOrInactiveClient({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["clients"],
+      });
+    },
+    onError: (error) => {
+      showSnackbar((error as any).response.data.error as string, "error");
+    },
   });
-  const toggleCustomerStatus = (customerId: number) => {
-    setCustomers((prev) =>
-      prev.map((customer) =>
-        customer.id === customerId
-          ? {
-              ...customer,
-              status: customer.status === "active" ? "inactive" : "active",
-            }
-          : customer,
-      ),
-    );
+  const { mutate: mutateDelete } = useDeleteAccount({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["clients"],
+      });
+      showSnackbar("Cliente excluído com successo!", "success");
+    },
+    onError: (error) => {
+      showSnackbar((error as any).response.data.error as string, "error");
+    },
+  });
+  const toggleCustomerStatus = (customerId: string, bool: boolean) => {
+    if (customerId) {
+      console.log("Toggling item:", customerId);
+      console.log("New isActive value:", bool);
+      mutateSwitch({
+        documentId: customerId,
+        bool: bool,
+      });
+    }
   };
+  const handleDelete = (id: string) => {
+    mutateDelete(id);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -52,7 +83,7 @@ export default function CustomersPage() {
             <div>
               <p className="text-gray-400 text-sm mb-1">Total de Clientes</p>
               <h3 className="text-3xl font-display font-bold text-white">
-                {customers.length}
+                {data?.count}
               </h3>
             </div>
             <div className="p-3 bg-accent-blue/10 rounded-lg">
@@ -82,7 +113,7 @@ export default function CustomersPage() {
             <div>
               <p className="text-gray-400 text-sm mb-1">Clientes Ativos</p>
               <h3 className="text-3xl font-display font-bold text-white">
-                {customers.filter((c) => c.status === "active").length}
+                {data?.clients?.filter((c) => c.isActive === true).length}
               </h3>
             </div>
             <div className="p-3 bg-accent-green/10 rounded-lg">
@@ -112,11 +143,11 @@ export default function CustomersPage() {
             <div>
               <p className="text-gray-400 text-sm mb-1">Ticket Médio</p>
               <h3 className="text-3xl font-display font-bold text-white">
-                R${" "}
-                {(
+                R$ 0,00
+                {/* {(
                   customers.reduce((sum, c) => sum + c.totalSpent, 0) /
                   customers.length
-                ).toFixed(2)}
+                ).toFixed(2)} */}
               </h3>
             </div>
             <div className="p-3 bg-accent-purple/10 rounded-lg">
@@ -194,10 +225,11 @@ export default function CustomersPage() {
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
+                <th />
               </tr>
             </thead>
             <tbody>
-              {filteredCustomers.map((customer, index) => (
+              {data?.clients?.map((customer, index) => (
                 <tr
                   key={customer.id}
                   className="table-row"
@@ -227,35 +259,37 @@ export default function CustomersPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <p className="text-sm text-gray-300">{customer.email}</p>
-                      <p className="text-xs text-gray-500">{customer.phone}</p>
+                      <p className="text-xs text-gray-500">
+                        {customer.phoneNumber}
+                      </p>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-sm font-semibold text-white">
-                      {customer.totalOrders}
+                      {0}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-sm font-semibold text-accent-green">
-                      R$ {customer.totalSpent.toFixed(2)}
+                      R$ 0,00
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {new Date(customer.joinDate).toLocaleDateString("pt-BR")}
+                    {formatDate(customer?.created_at)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={() => toggleCustomerStatus(customer.id)}
+                        onClick={() =>
+                          toggleCustomerStatus(customer.id, customer.isActive)
+                        }
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
-                          customer.status === "active"
-                            ? "bg-accent-green"
-                            : "bg-gray-600"
+                          customer.isActive ? "bg-accent-green" : "bg-gray-600"
                         }`}
                       >
                         <span
                           className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-300 ${
-                            customer.status === "active"
+                            customer.isActive
                               ? "translate-x-6"
                               : "translate-x-1"
                           }`}
@@ -263,14 +297,58 @@ export default function CustomersPage() {
                       </button>
                       <span
                         className={`text-xs font-medium ${
-                          customer.status === "active"
+                          customer.isActive
                             ? "text-accent-green"
                             : "text-gray-400"
                         }`}
                       >
-                        {customer.status === "active" ? "Ativo" : "Inativo"}
+                        {customer.isActive ? "Ativo" : "Inativo"}
                       </span>
                     </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button
+                      className="px-2"
+                      onClick={() => handleDelete(customer.id)}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                        <path d="M3 6h18" />
+                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                    </button>
+                    <button
+                      className="px-2"
+                      onClick={() => {
+                        setSelectedId(customer.id);
+                        setOpenModalDetails(true);
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -278,7 +356,7 @@ export default function CustomersPage() {
           </table>
         </div>
 
-        {filteredCustomers.length === 0 && (
+        {data?.clients?.length === 0 && (
           <div className="text-center py-12">
             <svg
               className="w-16 h-16 mx-auto text-gray-600 mb-4"
@@ -297,6 +375,12 @@ export default function CustomersPage() {
           </div>
         )}
       </div>
+      {openModalDetails && (
+        <ModalDetailsClient
+          onClose={() => setOpenModalDetails(false)}
+          data={data?.clients?.find((client) => client.id === selectedId)!}
+        />
+      )}
     </div>
   );
 }
