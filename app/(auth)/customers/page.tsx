@@ -171,7 +171,7 @@ export default function CustomersPage() {
 
       {/* Filters */}
       <div className="card animate-scale-in">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 w-full">
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">
               Buscar
@@ -183,20 +183,6 @@ export default function CustomersPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="input-field w-full"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
-              Status
-            </label>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
-              className="input-field w-full"
-            >
-              <option value="all">Todos</option>
-              <option value="active">Ativos</option>
-              <option value="inactive">Inativos</option>
-            </select>
           </div>
         </div>
       </div>
