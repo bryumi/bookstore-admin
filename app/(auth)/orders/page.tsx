@@ -1,6 +1,14 @@
 "use client";
 
+import { useSnackbar } from "@/hooks/useSnackbar";
 import { useAdmin } from "@/lib/admin-context";
+import { useApprovedExchange } from "@/services/orders/approveExchange";
+import { useApproveOrRejectOrder } from "@/services/orders/approveRejectOrder";
+import { useConfirmExchange } from "@/services/orders/confirmExchange";
+import { useDeliveredOrder } from "@/services/orders/deliveredOrder";
+import { useGetOrders } from "@/services/orders/getOrders";
+import { useSendOrder } from "@/services/orders/sendOrder";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 export default function OrdersPage() {
@@ -8,44 +16,106 @@ export default function OrdersPage() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredOrders = orders.filter((order) => {
+  const { data } = useGetOrders();
+  const filteredOrders = data?.filter((order) => {
     const matchesStatus =
       filterStatus === "all" || order.status === filterStatus;
     const matchesSearch =
       order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerName.toLowerCase().includes(searchTerm.toLowerCase());
+      order.client.name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesStatus && matchesSearch;
   });
-
+  const { showSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
+  const { mutate: mutateApproveOrReject } = useApproveOrRejectOrder({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["orders"],
+      });
+    },
+    onError: (error) => {
+      showSnackbar((error as any).response.data.error as string, "error");
+    },
+  });
+  const { mutate: mutateSendOrder } = useSendOrder({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["orders"],
+      });
+    },
+    onError: (error) => {
+      showSnackbar((error as any).response.data.error as string, "error");
+    },
+  });
+  const { mutate: mutateDelivered } = useDeliveredOrder({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["orders"],
+      });
+    },
+    onError: (error) => {
+      showSnackbar((error as any).response.data.error as string, "error");
+    },
+  });
+  const { mutate: mutateApprovedExchange } = useApprovedExchange({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["orders"],
+      });
+    },
+    onError: (error) => {
+      showSnackbar((error as any).response.data.error as string, "error");
+    },
+  });
+  const { mutate: mutateConfirmExchange } = useConfirmExchange({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["orders"],
+      });
+    },
+    onError: (error) => {
+      showSnackbar((error as any).response.data.error as string, "error");
+    },
+  });
   const getStatusColor = (status: string) => {
     const colors = {
-      processing: "bg-accent-orange/20 text-accent-orange border-accent-orange",
-      shipped: "bg-accent-blue/20 text-accent-blue border-accent-blue",
+      inProcessing:
+        "bg-accent-orange/20 text-accent-orange border-accent-orange",
+      inTransportation: "bg-accent-blue/20 text-accent-blue border-accent-blue",
+      approved: "bg-accent-green/20 text-accent-green border-accent-green",
+      failed: "bg-accent-red/20 text-accent-red border-accent-red",
       delivered: "bg-accent-cyan/20 text-accent-cyan border-accent-cyan",
-      exchange: "bg-accent-green/20 text-accent-green border-accent-green",
-      exchange_approved: "bg-accent-red/20 text-accent-red border-accent-red",
+      InExchange: "bg-accent-yellow/20 text-accent-yellow border-accent-yellow",
+      exchanged: "bg-accent-green/20 text-accent-green border-accent-green",
+      exchangeApproved: "bg-gray/20 text-gray border-gray",
     };
     return colors[status as keyof typeof colors];
   };
 
   const getStatusText = (status: string) => {
     const texts = {
-      processing: "Em Processamento",
-      shipped: "Em Trânsito",
+      inProcessing: "Em Processamento",
+      inTransportation: "Em Trânsito",
+      approved: "Aprovado",
+      failed: "Rejeitado",
       delivered: "Entregue",
-      exchange: "Em Troca",
-      exchange_approved: "Troca Autorizada",
+      InExchange: "Em Troca",
+      exchangeApproved: "Troca Autorizada",
+      exchanged: "Troca Concluida",
     };
     return texts[status as keyof typeof texts];
   };
 
   const statusOptions = [
     { value: "all", label: "Todos" },
-    { value: "processing", label: "Em Processamento" },
-    { value: "shipped", label: "Em Trânsito" },
+    { value: "inProcessing", label: "Em Processamento" },
+    { value: "inTransportation", label: "Em Trânsito" },
+    { value: "approved", label: "Aprovado" },
+    { value: "failed", label: "Rejeitado" },
     { value: "delivered", label: "Entregue" },
-    { value: "exchange", label: "Em Troca" },
-    { value: "exchange_approved", label: "Troca Autorizada" },
+    { value: "inExchange", label: "Em Troca" },
+    { value: "exchangeApproved", label: "Troca Autorizada" },
+    { value: "exchanged", label: "Troca Concluida" },
   ];
 
   return (
@@ -121,7 +191,7 @@ export default function OrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredOrders.map((order, index) => (
+              {filteredOrders?.map((order, index) => (
                 <tr
                   key={order.id}
                   className="table-row"
@@ -135,23 +205,25 @@ export default function OrdersPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <p className="text-sm font-medium text-white">
-                        {order.customerName}
+                        {order.client.name}
                       </p>
                       <p className="text-xs text-gray-400">
-                        {order.items.length}{" "}
-                        {order.items.length === 1 ? "item" : "itens"}
+                        {order?.orderItems?.reduce((acumulador, item) => {
+                          return acumulador + item.quantity;
+                        }, 0)}{" "}
+                        {"iten(s)"}
                       </p>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {new Date(order.date).toLocaleDateString("pt-BR", {
+                    {new Date(order.orderDate).toLocaleDateString("pt-BR", {
                       day: "2-digit",
                       month: "short",
                       year: "numeric",
                     })}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
-                    R$ {order.total.toFixed(2)}
+                    R$ {Number(order.totalPrice).toFixed(2).replace(".", ",")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
@@ -161,7 +233,7 @@ export default function OrdersPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <select
+                    {/* <select
                       value={order.status}
                       onChange={(e) =>
                         updateOrderStatus(order.id, e.target.value as any)
@@ -175,7 +247,65 @@ export default function OrdersPage() {
                       <option value="exchange_approved">
                         Troca Autorizada
                       </option>
-                    </select>
+                    </select> */}
+                    {order.status === "inProcessing" && (
+                      <div className="flex gap-2">
+                        <button
+                          className="bg-accent-green border border-accent-green rounded px-2 py-1 text-xs text-white"
+                          onClick={() => {
+                            mutateApproveOrReject({
+                              documentId: order.id,
+                              status: "approved",
+                            });
+                          }}
+                        >
+                          Aprovar
+                        </button>
+                        <button
+                          className="bg-accent-red border border-accent-red rounded px-2 py-1 text-xs text-white"
+                          onClick={() => {
+                            mutateApproveOrReject({
+                              documentId: order.id,
+                              status: "rejected",
+                            });
+                          }}
+                        >
+                          Reprovar
+                        </button>
+                      </div>
+                    )}
+                    {order.status === "approved" && (
+                      <button
+                        className="bg-accent-blue border border-accent-blue rounded px-2 py-1 text-xs text-white"
+                        onClick={() => mutateSendOrder(order.id)}
+                      >
+                        Enviar o pedido
+                      </button>
+                    )}
+                    {order.status === "inTransportation" && (
+                      <button
+                        className="bg-emerald-500 border border-emerald-500 rounded px-2 py-1 text-xs text-white"
+                        onClick={() => mutateDelivered(order.id)}
+                      >
+                        Marcar pedido como entregue
+                      </button>
+                    )}
+                    {order.status === "InExchange" && (
+                      <button
+                        className="bg-accent-orange border border-accent-orange rounded px-2 py-1 text-xs text-white"
+                        onClick={() => mutateApprovedExchange(order.id)}
+                      >
+                        Aprovar troca
+                      </button>
+                    )}
+                    {order.status === "exchangeApproved" && (
+                      <button
+                        className="bg-neon-green border border-neon-green rounded px-2 py-1 text-xs text-white"
+                        onClick={() => mutateConfirmExchange(order.id)}
+                      >
+                        Confirmar recebimento
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -183,7 +313,7 @@ export default function OrdersPage() {
           </table>
         </div>
 
-        {filteredOrders.length === 0 && (
+        {filteredOrders?.length === 0 && (
           <div className="text-center py-12">
             <svg
               className="w-16 h-16 mx-auto text-gray-600 mb-4"
@@ -208,31 +338,31 @@ export default function OrdersPage() {
         <div className="card bg-gradient-to-br from-accent-blue/10 to-dark-800 border-accent-blue/30">
           <p className="text-gray-400 text-sm mb-1">Em Processamento</p>
           <p className="text-2xl font-bold text-white">
-            {orders.filter((o) => o.status === "processing").length}
+            {data?.filter((o) => o.status === "inProcessing").length}
           </p>
         </div>
         <div className="card bg-gradient-to-br from-accent-cyan/10 to-dark-800 border-accent-cyan/30">
           <p className="text-gray-400 text-sm mb-1">Em Trânsito</p>
           <p className="text-2xl font-bold text-white">
-            {orders.filter((o) => o.status === "shipped").length}
+            {data?.filter((o) => o.status === "inTransportation").length}
           </p>
         </div>
         <div className="card bg-gradient-to-br from-accent-green/10 to-dark-800 border-accent-green/30">
           <p className="text-gray-400 text-sm mb-1">Entregue</p>
           <p className="text-2xl font-bold text-white">
-            {orders.filter((o) => o.status === "delivered").length}
+            {data?.filter((o) => o.status === "delivered").length}
           </p>
         </div>
         <div className="card bg-gradient-to-br from-accent-purple/10 to-dark-800 border-accent-purple/30">
           <p className="text-gray-400 text-sm mb-1">Em Troca</p>
           <p className="text-2xl font-bold text-white">
-            {orders.filter((o) => o.status === "exchange").length}
+            {data?.filter((o) => o.status === "exchanged").length}
           </p>
         </div>
         <div className="card bg-gradient-to-br from-accent-pink/10 to-dark-800 border-accent-pink/30">
           <p className="text-gray-400 text-sm mb-1">Troca Autorizada</p>
           <p className="text-2xl font-bold text-white">
-            {orders.filter((o) => o.status === "exchange_approved").length}
+            {data?.filter((o) => o.status === "exchangeApproved").length}
           </p>
         </div>
       </div>

@@ -18,13 +18,7 @@ export default function CustomersPage() {
   const [openModalDetails, setOpenModalDetails] = useState(false);
   const [selectedId, setSelectedId] = useState("");
   const { data } = useGetClients({ search: searchTerm });
-  // const filteredCustomers = data?.clients?.filter((customer) => {
-  //   const matchesSearch =
-  //     customer.name.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-  //     customer.email.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-  //     customer.phoneNumber.includes(searchTerm);
-  //   return matchesSearch;
-  // });
+
   const { showSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
   const { mutate: mutateSwitch } = useActiveOrInactiveClient({
