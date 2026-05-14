@@ -7,6 +7,7 @@ import { useApproveOrRejectOrder } from "@/services/orders/approveRejectOrder";
 import { useConfirmExchange } from "@/services/orders/confirmExchange";
 import { useDeliveredOrder } from "@/services/orders/deliveredOrder";
 import { useGetOrders } from "@/services/orders/getOrders";
+import { useRejectExchange } from "@/services/orders/rejectExchange";
 import { useSendOrder } from "@/services/orders/sendOrder";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -67,6 +68,16 @@ export default function OrdersPage() {
       showSnackbar((error as any).response.data.error as string, "error");
     },
   });
+  const { mutate: mutateRejectExchange } = useRejectExchange({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["orders"],
+      });
+    },
+    onError: (error) => {
+      showSnackbar((error as any).response.data.error as string, "error");
+    },
+  });
   const { mutate: mutateConfirmExchange } = useConfirmExchange({
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -101,6 +112,7 @@ export default function OrdersPage() {
       delivered: "Entregue",
       InExchange: "Em Troca",
       exchangeApproved: "Troca Autorizada",
+      exchangeFailed: "Troca Reprovada",
       exchanged: "Troca Concluida",
     };
     return texts[status as keyof typeof texts];
@@ -115,12 +127,12 @@ export default function OrdersPage() {
     { value: "delivered", label: "Entregue" },
     { value: "inExchange", label: "Em Troca" },
     { value: "exchangeApproved", label: "Troca Autorizada" },
+    {value: "exchangeFailed", label: "Troca Reprovada"},
     { value: "exchanged", label: "Troca Concluida" },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between animate-fade-in">
         <div>
           <h1 className="text-4xl font-display font-bold text-white mb-2">
@@ -130,7 +142,6 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Filters */}
       <div className="card animate-scale-in">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -164,7 +175,6 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Orders Table */}
       <div className="card overflow-hidden animate-fade-in">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -291,12 +301,22 @@ export default function OrdersPage() {
                       </button>
                     )}
                     {order.status === "InExchange" && (
+                      <div className="flex gap-2">
                       <button
-                        className="bg-accent-orange border border-accent-orange rounded px-2 py-1 text-xs text-white"
+                        className="bg-accent-green border border-accent-green rounded px-2 py-1 text-xs text-white"
                         onClick={() => mutateApprovedExchange(order.id)}
                       >
                         Aprovar troca
                       </button>
+                      <button
+                          className="bg-accent-red border border-accent-red rounded px-2 py-1 text-xs text-white"
+                          onClick={() => {
+                            mutateRejectExchange(order.id);
+                          }}
+                        >
+                          Reprovar troca
+                        </button>
+                      </div>
                     )}
                     {order.status === "exchangeApproved" && (
                       <button

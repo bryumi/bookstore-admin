@@ -86,7 +86,6 @@ export default function Home() {
                   aria-label={viewPassword ? "Ocultar senha" : "Ver senha"}
                 >
                   {!viewPassword ? (
-                    // Ícone olho fechado (ocultar)
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
@@ -102,7 +101,6 @@ export default function Home() {
                       />
                     </svg>
                   ) : (
-                    // Ícone olho aberto (ver)
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
