@@ -9,7 +9,7 @@ export default function AuthLayout({
 }) {
   return (
     <AdminProvider>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen overflow-x-hidden">
         <Sidebar />
         <div className="flex-1 ml-64">
           <Header />

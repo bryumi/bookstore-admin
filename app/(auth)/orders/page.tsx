@@ -127,12 +127,12 @@ export default function OrdersPage() {
     { value: "delivered", label: "Entregue" },
     { value: "inExchange", label: "Em Troca" },
     { value: "exchangeApproved", label: "Troca Autorizada" },
-    {value: "exchangeFailed", label: "Troca Reprovada"},
+    { value: "exchangeFailed", label: "Troca Reprovada" },
     { value: "exchanged", label: "Troca Concluida" },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-[90%]">
       <div className="flex items-center justify-between animate-fade-in">
         <div>
           <h1 className="text-4xl font-display font-bold text-white mb-2">
@@ -176,7 +176,7 @@ export default function OrdersPage() {
       </div>
 
       <div className="card overflow-hidden animate-fade-in">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" data-cy="orders-page">
           <table className="w-full">
             <thead>
               <tr className="border-b border-dark-600">
@@ -302,13 +302,13 @@ export default function OrdersPage() {
                     )}
                     {order.status === "InExchange" && (
                       <div className="flex gap-2">
-                      <button
-                        className="bg-accent-green border border-accent-green rounded px-2 py-1 text-xs text-white"
-                        onClick={() => mutateApprovedExchange(order.id)}
-                      >
-                        Aprovar troca
-                      </button>
-                      <button
+                        <button
+                          className="bg-accent-green border border-accent-green rounded px-2 py-1 text-xs text-white"
+                          onClick={() => mutateApprovedExchange(order.id)}
+                        >
+                          Aprovar troca
+                        </button>
+                        <button
                           className="bg-accent-red border border-accent-red rounded px-2 py-1 text-xs text-white"
                           onClick={() => {
                             mutateRejectExchange(order.id);
