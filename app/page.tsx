@@ -62,6 +62,7 @@ export default function Home() {
                 type="email"
                 {...register("email")}
                 className="input-field w-full"
+                data-cy="email-input-admin"
               />
               {errors.email && (
                 <p className="mt-1.5 text-sm text-red-500 flex items-center gap-1">
@@ -78,6 +79,7 @@ export default function Home() {
                   type={viewPassword ? "text" : "password"}
                   {...register("password")}
                   className="input-field w-full pr-10"
+                  data-cy="password-input-admin"
                 />
                 <button
                   type="button"
