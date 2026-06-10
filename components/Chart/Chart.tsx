@@ -44,23 +44,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   biografia: "Biografia",
 };
 
-function formatMonthLabel(ym: string): string {
-  const [year, month] = ym.split("-");
-  const months = [
-    "Jan",
-    "Fev",
-    "Mar",
-    "Abr",
-    "Mai",
-    "Jun",
-    "Jul",
-    "Ago",
-    "Set",
-    "Out",
-    "Nov",
-    "Dez",
-  ];
-  return `${months[parseInt(month, 10) - 1]}/${year.slice(2)}`;
+function formatDateLabel(date: string): string {
+  const [year, month, day] = date.split("-");
+
+  return `${day}/${month}`;
 }
 
 // ─── Custom Tooltip ──────────────────────────────────────────────────────────
@@ -69,9 +56,7 @@ function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-dark-800 border border-white/10 rounded-xl p-4 shadow-2xl backdrop-blur-sm min-w-[160px]">
-      <p className="text-gray-400 text-xs font-mono mb-3 uppercase tracking-widest">
-        {label}
-      </p>
+      <p className="text-gray-400 text-xs font-mono mb-3">{label}</p>
       {payload.map((entry: any) => (
         <div
           key={entry.name}
@@ -139,15 +124,19 @@ export default function SalesByCategoryChart() {
   }, [fetchData]);
 
   const chartData = salesData
-    ? salesData.months.map((month, i) => {
-        const point: Record<string, any> = { month: formatMonthLabel(month) };
+    ? salesData.months.map((date, i) => {
+        const point: Record<string, any> = {
+          date: formatDateLabel(date),
+        };
+
         salesData.series.forEach((s) => {
-          point[s.category] = s.data[i] ?? 0;
+          point[s.category] = Number(s.data[i] ?? 0);
         });
+
         return point;
       })
     : [];
-
+  console.log(chartData);
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) => {
       const next = new Set(prev);
@@ -265,53 +254,55 @@ export default function SalesByCategoryChart() {
         <div
           className={loading || error ? "opacity-20 pointer-events-none" : ""}
         >
-          <LineChart
-            width={800}
-            height={320}
-            data={chartData}
-            margin={{ top: 4, right: 8, left: -16, bottom: 0 }}
-          >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.05)"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="month"
-              tick={{ fill: "#6B7280", fontSize: 11, fontFamily: "monospace" }}
-              axisLine={false}
-              tickLine={false}
-              interval="preserveStartEnd"
-            />
-            <YAxis
-              tick={{ fill: "#6B7280", fontSize: 11 }}
-              axisLine={false}
-              tickLine={false}
-              allowDecimals={false}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{ stroke: "rgba(255,255,255,0.08)", strokeWidth: 1 }}
-            />
-            {allCategories
-              .filter((cat) => selectedCategories.has(cat))
-              .map((cat) => (
-                <Line
-                  key={cat}
-                  type="monotone"
-                  dataKey={cat}
-                  stroke={CATEGORY_COLORS[cat] ?? "#94A3B8"}
-                  strokeWidth={2}
-                  dot={{
-                    r: 3,
-                    fill: CATEGORY_COLORS[cat] ?? "#94A3B8",
-                    strokeWidth: 0,
-                  }}
-                  activeDot={{ r: 5, strokeWidth: 0 }}
-                  animationDuration={600}
-                />
-              ))}
-          </LineChart>
+          <ResponsiveContainer width="100%" height={320}>
+            <LineChart
+              data={chartData}
+              margin={{ top: 4, right: 8, bottom: 0, left: 30 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="rgba(255,255,255,0.05)"
+                vertical={false}
+              />
+
+              <XAxis
+                dataKey={"date"}
+                height={40}
+                tick={{ fill: "#9CA3AF", fontSize: 12 }}
+                axisLine={{ stroke: "#374151" }}
+                tickLine={false}
+              />
+              <YAxis
+                width={40}
+                tick={{ fill: "#9CA3AF", fontSize: 12 }}
+                axisLine={{ stroke: "#374151" }}
+                tickLine={false}
+                allowDecimals={false}
+              />
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{ stroke: "rgba(255,255,255,0.08)", strokeWidth: 1 }}
+              />
+              {allCategories
+                .filter((cat) => selectedCategories.has(cat))
+                .map((cat) => (
+                  <Line
+                    key={cat}
+                    type="monotone"
+                    dataKey={cat}
+                    stroke={CATEGORY_COLORS[cat] ?? "#94A3B8"}
+                    strokeWidth={2}
+                    dot={{
+                      r: 3,
+                      fill: CATEGORY_COLORS[cat] ?? "#94A3B8",
+                      strokeWidth: 0,
+                    }}
+                    activeDot={{ r: 5, strokeWidth: 0 }}
+                    animationDuration={600}
+                  />
+                ))}
+            </LineChart>
+          </ResponsiveContainer>
         </div>
 
         {!loading && !error && chartData.length === 0 && (
